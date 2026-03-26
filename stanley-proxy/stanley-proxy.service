@@ -1,0 +1,25 @@
+[Unit]
+Description=Stanley Anthropic Logging Proxy
+Wants=network-online.target
+After=network-online.target
+Before=openclaw.service
+
+[Service]
+Type=simple
+WorkingDirectory=/opt/stanley-proxy
+EnvironmentFile=/etc/stanley-proxy/stanley-proxy.env
+ExecStart=/opt/stanley-proxy/venv/bin/python /opt/stanley-proxy/proxy.py
+Restart=on-failure
+RestartSec=2
+TimeoutStartSec=10
+StandardError=journal
+
+# Sandboxing (remove any that conflict with your setup)
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/var/log /tmp
+
+[Install]
+WantedBy=multi-user.target
