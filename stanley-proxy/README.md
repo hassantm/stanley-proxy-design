@@ -58,6 +58,8 @@ sudo systemctl start stanley-proxy
 
 ## Install (macOS — Marlowe)
 
+> **Warning:** `DATABASE_URL` is stored in plaintext inside `com.stanley.proxy.plist`, which lives in your home directory. Edit it with appropriate care and ensure the file permissions are restrictive (`chmod 600 ~/Library/LaunchAgents/com.stanley.proxy.plist`).
+
 ```bash
 sudo mkdir -p /opt/stanley-proxy
 sudo cp -r . /opt/stanley-proxy/
