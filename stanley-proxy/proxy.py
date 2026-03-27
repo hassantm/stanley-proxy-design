@@ -149,6 +149,11 @@ async def handle_proxy(request: web.Request) -> web.StreamResponse:
         )
 
         # --- Streaming path ---
+        logger.debug(
+            "%s %s → %d (Content-Type: %s)",
+            request.method, request.path, upstream_resp.status,
+            upstream_resp.headers.get("Content-Type", "unknown"),
+        )
         if _is_event_stream(upstream_resp):
             stream_resp = web.StreamResponse(
                 status=upstream_resp.status,
@@ -182,6 +187,7 @@ async def handle_proxy(request: web.Request) -> web.StreamResponse:
 
         # --- Non-streaming path ---
         resp_body = await upstream_resp.read()
+        logger.debug("Non-streaming response: %d bytes", len(resp_body))
 
         if should_log and req_json is not None:
             resp_json: dict | None = None
@@ -208,7 +214,11 @@ async def create_app(cfg: Config) -> web.Application:
 
     async def on_startup(app: web.Application) -> None:
         connector = aiohttp.TCPConnector(limit=20, ttl_dns_cache=300)
-        app["session"] = aiohttp.ClientSession(connector=connector)
+        # auto_decompress=False: we are a transparent proxy — pass raw bytes
+        # through unchanged. If True (the default), aiohttp decompresses the
+        # body but we still forward the original Content-Encoding/Content-Length
+        # headers, causing OpenClaw to try to decompress already-decompressed content.
+        app["session"] = aiohttp.ClientSession(connector=connector, auto_decompress=False)
 
         db = await ExchangeLogger.create(cfg.database_url)
         await db.probe()
