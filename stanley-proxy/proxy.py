@@ -12,6 +12,7 @@ from typing import Any
 
 import aiohttp
 from aiohttp import web
+from yarl import URL as YarlURL
 
 from config import Config, load_config
 from db import ExchangeLogger
@@ -120,13 +121,10 @@ async def handle_proxy(request: web.Request) -> web.StreamResponse:
     upstream_url = cfg.upstream_url + request.path_qs
 
     req_body = await request.read()
-    req_headers = _strip_hop_by_hop(request.headers)
-    req_headers["Host"] = aiohttp.ClientSession._requote_redirect_url  # type: ignore[attr-defined]
 
     # Build upstream headers: strip hop-by-hop, fix Host.
     fwd_headers = _strip_hop_by_hop(request.headers)
-    parsed_upstream = aiohttp.client_reqrep.URL(cfg.upstream_url)  # type: ignore[attr-defined]
-    fwd_headers["Host"] = parsed_upstream.host or "api.anthropic.com"
+    fwd_headers["Host"] = YarlURL(cfg.upstream_url).host or "api.anthropic.com"
 
     # Parse request JSON if this is the logging endpoint.
     req_json: dict | None = None
