@@ -160,15 +160,17 @@ async def handle_proxy(request: web.Request) -> web.StreamResponse:
             parts: list[str] = []
             resp_model: str | None = None
 
-            async for chunk in upstream_resp.content.iter_any():
-                await stream_resp.write(chunk)
-                if should_log:
-                    try:
-                        accumulate_sse_chunks(sse_state, parts, chunk)
-                    except Exception:
-                        logger.exception("SSE accumulation error (non-fatal)")
-
-            await stream_resp.write_eof()
+            try:
+                async for chunk in upstream_resp.content.iter_any():
+                    await stream_resp.write(chunk)
+                    if should_log:
+                        try:
+                            accumulate_sse_chunks(sse_state, parts, chunk)
+                        except Exception:
+                            logger.exception("SSE accumulation error (non-fatal)")
+                await stream_resp.write_eof()
+            except (ConnectionResetError, aiohttp.ClientConnectionResetError):
+                logger.debug("Client disconnected during streaming")
 
             if should_log and req_json is not None:
                 assistant_text = "".join(parts)
