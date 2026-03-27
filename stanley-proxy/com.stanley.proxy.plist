@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.stanley.proxy</string>
+
+    <key>ProgramArguments</key>
+    <array>
+        <string>/opt/stanley-proxy/venv/bin/python</string>
+        <string>/opt/stanley-proxy/proxy.py</string>
+    </array>
+
+    <key>WorkingDirectory</key>
+    <string>/opt/stanley-proxy</string>
+
+    <!-- Environment variables — edit DATABASE_URL before loading -->
+    <key>EnvironmentVariables</key>
+    <dict>
+        <key>DATABASE_URL</key>
+        <string>postgresql://user:pass@localhost/stanley</string>
+        <key>PROXY_HOST</key>
+        <string>127.0.0.1</string>
+        <key>PROXY_PORT</key>
+        <string>8888</string>
+        <key>UPSTREAM_URL</key>
+        <string>https://api.anthropic.com</string>
+        <key>LOG_LEVEL</key>
+        <string>INFO</string>
+    </dict>
+
+    <!-- Keep the process alive; restart on crash -->
+    <key>KeepAlive</key>
+    <true/>
+
+    <!-- Wait 2s before restarting on failure -->
+    <key>ThrottleInterval</key>
+    <integer>2</integer>
+
+    <!-- Log to files in /tmp; redirect to a permanent path if preferred -->
+    <key>StandardOutPath</key>
+    <string>/tmp/stanley-proxy.stdout.log</string>
+    <key>StandardErrorPath</key>
+    <string>/tmp/stanley-proxy.stderr.log</string>
+
+    <!-- Start at login -->
+    <key>RunAtLoad</key>
+    <true/>
+</dict>
+</plist>

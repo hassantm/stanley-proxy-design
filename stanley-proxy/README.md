@@ -56,6 +56,40 @@ sudo systemctl start stanley-proxy
 
 ---
 
+## Install (macOS — Marlowe)
+
+```bash
+sudo mkdir -p /opt/stanley-proxy
+sudo cp -r . /opt/stanley-proxy/
+
+cd /opt/stanley-proxy
+python3 -m venv venv
+venv/bin/pip install -r requirements.txt
+
+# Edit DATABASE_URL in the plist before loading
+nano com.stanley.proxy.plist
+
+# Install and start
+cp com.stanley.proxy.plist ~/Library/LaunchAgents/
+launchctl load ~/Library/LaunchAgents/com.stanley.proxy.plist
+```
+
+Check it's running:
+
+```bash
+launchctl list | grep stanley
+tail -f /tmp/stanley-proxy.stderr.log
+```
+
+To stop/restart:
+
+```bash
+launchctl unload ~/Library/LaunchAgents/com.stanley.proxy.plist
+launchctl load   ~/Library/LaunchAgents/com.stanley.proxy.plist
+```
+
+---
+
 ## OpenClaw Integration
 
 Point OpenClaw's Anthropic API base URL at the proxy. Try in order:
